@@ -16,21 +16,97 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Architecture
 
-## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+WebPro is built as a **multi-tenant SaaS platform** with role-based access and modular feature layers.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### System Layers
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+**Frontend (Client Layer)**
 
-## Deploy on Vercel
+* Next.js + React for UI and routing
+* Role-based dashboards (Agency Owner, Subaccount User)
+* Drag-and-drop builders for pages, funnels, and Kanban boards
+* Real-time UI updates for tickets, notifications, and automations
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Backend (Application Layer)**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+* Node.js API with Prisma ORM
+* Handles authentication, permissions, and business logic
+* Manages workflows for:
+
+  * Agencies and subaccounts
+  * Pipelines, lanes, and tickets
+  * Automations and triggers
+  * Media, funnels, and contacts
+
+**Database (Data Layer – MySQL)**
+
+* Multi-tenant schema with strict relations between:
+
+  * Agency → SubAccount → Users
+  * Pipelines → Lanes → Tickets
+  * Automations → Actions → Instances
+* Indexed foreign keys for fast filtering and isolation per agency
+* Centralized models for Notifications, Invitations, Media, and Subscriptions
+
+---
+
+### Multi-Tenant Design
+
+* **Agency** is the top-level tenant
+* Each agency owns multiple **SubAccounts**
+* Users are scoped by **agencyId** and **permissions**
+* All core resources (pipelines, funnels, media, automations) are scoped to a subaccount
+* Data isolation enforced through relational constraints
+
+---
+
+### Permissions & Access Control
+
+* Role-based access via `Role` enum
+* Feature-level access using `Permissions` table
+* Sidebar and UI modules are dynamically generated from database config
+* Protected routes at both API and UI level
+
+---
+
+### Automation Architecture
+
+* **Trigger** defines the event source (e.g., form submission)
+* **Automation** links triggers to workflows
+* **Action** defines executable steps
+* **AutomationInstance** tracks runtime state
+* Supports chained actions and ordered execution
+
+---
+
+### Notification Flow
+
+* System events (invites, assignments, automation actions) generate `Notification` records
+* Notifications are scoped to:
+
+  * Agency
+  * Subaccount (optional)
+  * User
+* Displayed in real-time within dashboard
+
+---
+
+### Funnel & Page System
+
+* **Funnel** groups multiple pages
+* **FunnelPage** stores page content and visit metrics
+* Media and class styling are decoupled via `Media` and `ClassName` models
+* Supports custom subdomains and publishing
+
+---
+
+### Payment & Subscription Model
+
+* Stripe-based billing system
+* `Subscription` and `AddOns` linked directly to Agency
+* Plan enforcement applied at feature level
+* Supports modular upgrades
