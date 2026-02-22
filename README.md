@@ -11,11 +11,16 @@ yarn dev
 # or
 pnpm dev
 # or
-bun dev
+bun run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+🎥 Demo Video: 
+[Watch here](https://urcc780qxa.ufs.sh/f/3hRfy31IODNYT6zzQhyjrlPCkNJiUtWK03pH1YXe5Z74zfDs)
+
+🌐 Live Site: 
+[https://gowebpro.vercel.app/](https://gowebpro.vercel.app/)  
 
 Architecture
 
